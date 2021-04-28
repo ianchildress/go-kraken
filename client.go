@@ -13,58 +13,34 @@ const baseURL = "https://api.kraken.com"
 type Client struct {
 	key    string
 	secret string
+	client *http.Client
 }
 
 func NewClient(key, secret string) Client {
-	return Client{key: key, secret: secret}
+	return Client{key: key, secret: secret, client: &http.Client{Timeout: time.Second * 10}}
 }
 
-func nonce() int64 {
-	return time.Now().Unix()
+// path builds and returns the full url needed to reach the intended endpoint
+func path(base, suffix string) string {
+	return fmt.Sprintf("%s%s", base, suffix)
 }
 
-const serverTimePath = "/0/public/Time"
-
-type ServerTimeResponse struct {
-	Error  []error
-	Result ServerTimeResult
-}
-
-type ServerTimeResult struct {
-	UnixTime int64
-	RFC1123  time.Time
-}
-
-func (c Client) ServerTime() (ServerTimeResponse, error) {
-	var out ServerTimeResponse
-
-	req, err := http.NewRequest("GET", path(baseURL, serverTimePath), nil)
+// sendPublic will send the http request and attempt to unmarshal the json response into the given interface
+func (c Client) sendPublic(req *http.Request, v interface{}) error {
+	resp, err := c.client.Do(req)
 	if err != nil {
-		return out, err
-	}
-
-	req.Header.Set("Cache-Control", "no-cache")
-
-	client := &http.Client{Timeout: time.Second * 10}
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return out, err
+		return wrap(err)
 	}
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return out, err
+		return wrap(err)
 	}
 
-	if err := json.Unmarshal(body, &out); err != nil {
-		return out, err
+	if err := json.Unmarshal(body, v); err != nil {
+		return wrap(err)
 	}
 
-	return out, nil
-}
-
-func path(base, suffix string) string {
-	return fmt.Sprintf("%s%s", base, suffix)
+	return nil
 }
