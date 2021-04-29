@@ -30,17 +30,17 @@ func path(base, suffix string) string {
 func (c Client) sendPublic(req *http.Request, v interface{}) error {
 	resp, err := c.client.Do(req)
 	if err != nil {
-		return wrap(err)
+		return Wrap(err)
 	}
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return wrap(err)
+		return Wrap(err)
 	}
 
 	if err := json.Unmarshal(body, v); err != nil {
-		return wrap(err)
+		return Wrap(err)
 	}
 
 	return nil

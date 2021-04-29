@@ -12,17 +12,17 @@ func (c Client) sendPrivate(req *http.Request, v interface{}) error {
 
 	resp, err := c.client.Do(req)
 	if err != nil {
-		return wrap(err)
+		return Wrap(err)
 	}
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return wrap(err)
+		return Wrap(err)
 	}
 
 	if err := json.Unmarshal(body, v); err != nil {
-		return wrap(err)
+		return Wrap(err)
 	}
 
 	return nil
@@ -47,7 +47,7 @@ type GetOpenOrdersResponse struct {
 //	var resp GetOpenOrdersResponse
 //	req, err := http.NewRequest("POST", path(baseURL, serverTimePath), nil)
 //	if err != nil {
-//		return resp, wrap(err)
+//		return resp, Wrap(err)
 //	}
 //
 //}

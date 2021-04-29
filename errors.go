@@ -2,6 +2,7 @@ package kraken
 
 import (
 	"fmt"
+	"os"
 	"runtime"
 
 	"github.com/pkg/errors"
@@ -23,8 +24,15 @@ func (ke KrakenErrors) Errors() error {
 	return errors.New(err)
 }
 
-func wrap(err error) error {
+func Wrap(err error) error {
 	return errors.Wrap(err, callerLocation())
+}
+
+func ExitOnError(err error) {
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 }
 
 func callerLocation() string {

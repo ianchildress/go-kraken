@@ -26,17 +26,17 @@ func (c Client) ServerTime() (ServerTimeResponse, error) {
 
 	req, err := http.NewRequest("GET", path(baseURL, serverTimePath), nil)
 	if err != nil {
-		return resp, wrap(err)
+		return resp, Wrap(err)
 	}
 
 	// sendPublic request
 	if err := c.sendPublic(req, &resp); err != nil {
-		return resp, wrap(err)
+		return resp, Wrap(err)
 	}
 
 	// check for response errors
 	if err := resp.Error.Errors(); err != nil {
-		return resp, wrap(err)
+		return resp, Wrap(err)
 	}
 
 	return resp, nil
@@ -68,17 +68,17 @@ func (c Client) OHLC(pair string, interval int64, since time.Time) ([]OHLC, erro
 		baseURL, apiVersion, pair, interval, since.Unix())
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		return nil, wrap(err)
+		return nil, Wrap(err)
 	}
 
 	// sendPublic request
 	if err := c.sendPublic(req, &resp); err != nil {
-		return nil, wrap(err)
+		return nil, Wrap(err)
 	}
 
 	// check for response errors
 	if err := resp.Error.Errors(); err != nil {
-		return nil, wrap(err)
+		return nil, Wrap(err)
 	}
 
 	for k, v := range resp.Result {
@@ -89,7 +89,7 @@ func (c Client) OHLC(pair string, interval int64, since time.Time) ([]OHLC, erro
 		s := fmt.Sprintf("%v", v)
 		out, err = parseOHLC(s)
 		if err != nil {
-			return nil, wrap(err)
+			return nil, Wrap(err)
 		}
 	}
 
@@ -117,7 +117,7 @@ func parseOHLC(s string) ([]OHLC, error) {
 		case 0:
 			f, err := strconv.ParseFloat(s, 64)
 			if err != nil {
-				return nil, wrap(err)
+				return nil, Wrap(err)
 			}
 
 			ohlc.Timestamp = int64(f)
@@ -125,43 +125,43 @@ func parseOHLC(s string) ([]OHLC, error) {
 		case 1:
 			ohlc.Open, err = strconv.ParseFloat(s, 64)
 			if err != nil {
-				return nil, wrap(err)
+				return nil, Wrap(err)
 			}
 			counter++
 		case 2:
 			ohlc.High, err = strconv.ParseFloat(s, 64)
 			if err != nil {
-				return nil, wrap(err)
+				return nil, Wrap(err)
 			}
 			counter++
 		case 3:
 			ohlc.Low, err = strconv.ParseFloat(s, 64)
 			if err != nil {
-				return nil, wrap(err)
+				return nil, Wrap(err)
 			}
 			counter++
 		case 4:
 			ohlc.Close, err = strconv.ParseFloat(s, 64)
 			if err != nil {
-				return nil, wrap(err)
+				return nil, Wrap(err)
 			}
 			counter++
 		case 5:
 			ohlc.VWAP, err = strconv.ParseFloat(s, 64)
 			if err != nil {
-				return nil, wrap(err)
+				return nil, Wrap(err)
 			}
 			counter++
 		case 6:
 			ohlc.Volume, err = strconv.ParseFloat(s, 64)
 			if err != nil {
-				return nil, wrap(err)
+				return nil, Wrap(err)
 			}
 			counter++
 		case 7:
 			f, err := strconv.ParseFloat(s, 64)
 			if err != nil {
-				return nil, wrap(err)
+				return nil, Wrap(err)
 			}
 
 			ohlc.TradeCount = int64(f)
