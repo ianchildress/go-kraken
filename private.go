@@ -43,11 +43,11 @@ func (c Client) setPrivateHeaders(req *http.Request) (*http.Request, int64) {
 type GetOpenOrdersResponse struct {
 }
 
-func (c Client) GetOpenOrders() (GetOpenOrdersResponse, error) {
-	var resp GetOpenOrdersResponse
-	req, err := http.NewRequest("POST", path(baseURL, serverTimePath), nil)
-	if err != nil {
-		return resp, wrap(err)
-	}
-
-}
+//func (c Client) GetOpenOrders() (GetOpenOrdersResponse, error) {
+//	var resp GetOpenOrdersResponse
+//	req, err := http.NewRequest("POST", path(baseURL, serverTimePath), nil)
+//	if err != nil {
+//		return resp, wrap(err)
+//	}
+//
+//}

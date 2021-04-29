@@ -7,6 +7,22 @@ import (
 	"github.com/pkg/errors"
 )
 
+type KrakenErrors []string
+
+func (ke KrakenErrors) Errors() error {
+	// if empty, return nil
+	if len(ke) == 0 {
+		return nil
+	}
+
+	// return errors
+	var err string
+	for _, s := range ke {
+		err += s + " "
+	}
+	return errors.New(err)
+}
+
 func wrap(err error) error {
 	return errors.Wrap(err, callerLocation())
 }
@@ -17,15 +33,4 @@ func callerLocation() string {
 		return fmt.Sprintf("%s:%d", file, no)
 	}
 	return "failed to determine line number"
-}
-
-func mergeErrors(multiErrors []error) error {
-	if len(multiErrors) > 0 {
-		var errString string
-		for _, err := range multiErrors {
-			errString += err.Error() + " "
-		}
-		return wrap(errors.New(errString))
-	}
-	return nil
 }

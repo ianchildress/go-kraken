@@ -9,6 +9,7 @@ import (
 )
 
 const baseURL = "https://api.kraken.com"
+const apiVersion = "0"
 
 type Client struct {
 	key    string
