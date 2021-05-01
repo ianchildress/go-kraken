@@ -42,7 +42,6 @@ func (c Client) OHLC(pair string, interval int64, since time.Time) (OHLCResponse
 	o.LastTimestamp = resp.last
 
 	for _, item := range resp.items {
-		fmt.Println(item.Timestamp, resp.last, item.Timestamp <= resp.last)
 		if item.Timestamp <= resp.last {
 			o.History = append(o.History, item)
 		} else {
