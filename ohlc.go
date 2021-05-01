@@ -22,8 +22,9 @@ type OHLC struct {
 }
 
 type OHLCResponse struct {
-	Current OHLC
-	History []OHLC
+	LastTimestamp int64
+	Current       OHLC
+	History       []OHLC
 }
 
 // OHLC returns OHLC entries based on market pair, interval and start time
@@ -38,6 +39,8 @@ func (c Client) OHLC(pair string, interval int64, since time.Time) (OHLCResponse
 	}
 
 	var o OHLCResponse
+	o.LastTimestamp = resp.last
+
 	for _, item := range resp.items {
 		fmt.Println(item.Timestamp, resp.last, item.Timestamp <= resp.last)
 		if item.Timestamp <= resp.last {
