@@ -39,16 +39,16 @@ func TestClient_ServerTime(t *testing.T) {
 }
 
 func Test_splitOHLC(t *testing.T) {
-	_, err := parseOHLC("")
+	_, err := parseOHLCResponse("")
 	if err == nil {
 		t.Errorf("excpted error")
 	}
 
-	_, err = parseOHLC("[]")
+	_, err = parseOHLCResponse("[]")
 	if err != nil {
 		t.Error(err)
 	}
-	resp, err := parseOHLC("[[1.6196436e+09 54450.0 54939.9 54115.0 54881.7 54537.1 179.88599954 2503] [1.6196472e+09 54901.0 54901.0 54578.6 54706.0 54761.0 30.33280582 644]]")
+	resp, err := parseOHLCResponse("[[1.6196436e+09 54450.0 54939.9 54115.0 54881.7 54537.1 179.88599954 2503] [1.6196472e+09 54901.0 54901.0 54578.6 54706.0 54761.0 30.33280582 644]]")
 	if err != nil {
 		t.Error(err)
 	}

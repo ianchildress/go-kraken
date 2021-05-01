@@ -10,13 +10,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-const ohlcPath = "/0/public/OHLC"
-
-type OHLCResponse struct {
-	Result map[string]interface{}
-	Error  KrakenErrors
-}
-
 type OHLC struct {
 	Timestamp  int64
 	Open       float64
@@ -28,40 +21,87 @@ type OHLC struct {
 	TradeCount int64
 }
 
+type OHLCResponse struct {
+	Current OHLC
+	History []OHLC
+}
+
 // OHLC returns OHLC entries based on market pair, interval and start time
-func (c Client) OHLC(pair string, interval int64, since time.Time) ([]OHLC, error) {
-	var resp OHLCResponse
-	var out []OHLC
+func (c Client) OHLC(pair string, interval int64, since time.Time) (OHLCResponse, error) {
+	resp, err := c.getOHLC(pair, interval, since)
+	if err != nil {
+		return OHLCResponse{}, Wrap(err)
+	}
+
+	if len(resp.items) == 0 {
+		return OHLCResponse{}, Wrap(fmt.Errorf("empty OHLC response"))
+	}
+
+	var o OHLCResponse
+	for _, item := range resp.items {
+		fmt.Println(item.Timestamp, resp.last, item.Timestamp <= resp.last)
+		if item.Timestamp <= resp.last {
+			o.History = append(o.History, item)
+		} else {
+			o.Current = item
+		}
+	}
+
+	return o, nil
+}
+
+type ohlcKrakenResponse struct {
+	Result map[string]interface{}
+	Error  KrakenErrors
+}
+
+type ohlcResponse struct {
+	items []OHLC
+	last  int64
+}
+
+const ohlcPath = "/0/public/OHLC"
+
+func (c Client) getOHLC(pair string, interval int64, since time.Time) (ohlcResponse, error) {
 	url := fmt.Sprintf("%s/%s/public/OHLC?pair=%s&interval=%v&since=%v",
 		baseURL, apiVersion, pair, interval, since.Unix())
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		return nil, Wrap(err)
+		return ohlcResponse{}, Wrap(err)
 	}
 
 	// sendPublic request
+	var resp ohlcKrakenResponse
 	if err := c.sendPublic(req, &resp); err != nil {
-		return nil, Wrap(err)
+		return ohlcResponse{}, Wrap(err)
 	}
 
 	// check for response errors
 	if err := resp.Error.Errors(); err != nil {
-		return nil, Wrap(err)
+		return ohlcResponse{}, Wrap(err)
 	}
 
+	// parse the response
+	var o ohlcResponse
 	for k, v := range resp.Result {
 		if k == "last" {
-			// TODO: provide last in response
+			f, err := strconv.ParseFloat(fmt.Sprintf("%v", v), 10)
+			if err != nil {
+				return ohlcResponse{}, Wrap(err)
+			}
+
+			o.last = int64(f)
 			continue
-		}
-		s := fmt.Sprintf("%v", v)
-		out, err = parseOHLC(s)
-		if err != nil {
-			return nil, Wrap(err)
+		} else {
+			s := fmt.Sprintf("%v", v)
+			o.items, err = parseOHLCResponse(s)
+			if err != nil {
+				return ohlcResponse{}, Wrap(err)
+			}
 		}
 	}
 
-	return out, nil
+	return o, nil
 }
 
 var ohlcSelect = regexp.MustCompile(`((?:[0-9\.]|e\+)+)`)
@@ -70,7 +110,7 @@ var ohlcSelect = regexp.MustCompile(`((?:[0-9\.]|e\+)+)`)
 // string response and assign it to fields in a struct.
 // this is incredibly hacky but i dont want to spend too much time on this. still working on proof of concept and can
 // come back and improve performance later.
-func parseOHLC(s string) ([]OHLC, error) {
+func parseOHLCResponse(s string) ([]OHLC, error) {
 	var out []OHLC
 	if len(s) == 0 {
 		return nil, errors.New("expected OHLC array, received empty string")
