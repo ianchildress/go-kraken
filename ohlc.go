@@ -40,6 +40,7 @@ func (c Client) OHLC(pair string, interval int64, since time.Time) (OHLCResponse
 		return OHLCResponse{}, Wrap(fmt.Errorf("empty OHLC response"))
 	}
 
+	fmt.Printf("%+v\n", resp)
 	j, _ := prettyjson.Marshal(resp)
 	fmt.Println(string(j))
 
