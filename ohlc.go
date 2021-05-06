@@ -73,6 +73,7 @@ const ohlcPath = "/0/public/OHLC"
 func (c Client) getOHLC(pair string, interval int64, since time.Time) (ohlcResponse, error) {
 	url := fmt.Sprintf("%s/%s/public/OHLC?pair=%s&interval=%v&since=%v",
 		baseURL, apiVersion, pair, interval, since.Unix())
+	fmt.Println(url)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return ohlcResponse{}, Wrap(err)
