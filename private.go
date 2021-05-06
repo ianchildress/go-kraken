@@ -32,17 +32,18 @@ func nonce() int64 {
 	return time.Now().Unix()
 }
 
-func (c Client) setPrivateHeaders(req *http.Request) (*http.Request, int64) {
-	nonce := time.Now().Unix()
+func (c Client) setPrivateHeaders(req *http.Request, signature string) *http.Request {
+
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded; charset=utf-8")
 	req.Header.Set("API-Key", c.key)
+	req.Header.Set("API-Sign", signature)
 
-	return req, nonce
+	return req
 }
 
-type GetOpenOrdersResponse struct {
-}
-
+//type GetOpenOrdersResponse struct {
+//}
+//
 //func (c Client) GetOpenOrders() (GetOpenOrdersResponse, error) {
 //	var resp GetOpenOrdersResponse
 //	req, err := http.NewRequest("POST", path(baseURL, serverTimePath), nil)

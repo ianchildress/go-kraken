@@ -7,6 +7,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/hokaccha/go-prettyjson"
+
 	"github.com/pkg/errors"
 )
 
@@ -37,6 +39,9 @@ func (c Client) OHLC(pair string, interval int64, since time.Time) (OHLCResponse
 	if len(resp.items) == 0 {
 		return OHLCResponse{}, Wrap(fmt.Errorf("empty OHLC response"))
 	}
+
+	j, _ := prettyjson.Marshal(resp)
+	fmt.Println(string(j))
 
 	var o OHLCResponse
 	o.LastTimestamp = resp.last
